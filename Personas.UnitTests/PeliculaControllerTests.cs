@@ -19,12 +19,16 @@ public class PeliculaControllerTests
        Name = "Francis",
        Age = 21,
        Email = "francis@francis.com",
-        LastName = "Alcantara"
+       LastName = "Alcantara"
     };
+    List<Persona> fakeList = new List<Persona>();
+    int invalidId = -1;
+    int diferentId = 2;
+    int unExistId = 2;
+
     [Fact]
     public async Task GetAllPersonasAsync_ExpectAListOfPersonas()
     {
-        var fakeList = new List<Persona>();
         var repositoryStub = new Mock<IPersonaRepository>();
         repositoryStub.Setup(repo => repo.GetAllPersonasAsync()).ReturnsAsync(fakeList);
         
@@ -34,6 +38,7 @@ public class PeliculaControllerTests
 
         Assert.IsType<OkObjectResult>(result);
     }
+
     [Fact]
     public async Task GetPersonaByIdAsync_withInvalidId_ExpectBadRequest()
     {
@@ -42,10 +47,11 @@ public class PeliculaControllerTests
 
         var controller = new PersonaController(repositoyStub.Object);
 
-        var result = await controller.Get(-999);
+        var result = await controller.Get(invalidId);
 
         Assert.IsType<BadRequestObjectResult>(result);
     }
+
     [Fact]
     public async Task GetPersonaByIdAsync_WithUnExistId_ExpectNotFound()
     {
@@ -54,10 +60,11 @@ public class PeliculaControllerTests
 
         var controller = new PersonaController(repositoryStub.Object);
 
-        var result = await controller.Get(999);
+        var result = await controller.Get(randomId.Next());
 
         Assert.IsType<NotFoundObjectResult>(result);
     }
+
     [Fact]
     public async Task GetPersonaByIdAsync_WithValidId_ExpectOk()
     {
@@ -70,6 +77,7 @@ public class PeliculaControllerTests
 
         Assert.IsType<OkObjectResult>(result);
     }
+
     [Fact]
     public async Task CreatePersonaAsync_WithValidEntity_ExpectACreateAtAction()
     {
@@ -82,6 +90,7 @@ public class PeliculaControllerTests
 
         Assert.IsType<CreatedAtActionResult>(result);
     }
+
     [Fact]
     public async Task CreatePersonaAsync_WithInvalidEntity_ExpectBadRequest()
     {
@@ -94,6 +103,7 @@ public class PeliculaControllerTests
 
         Assert.IsType<BadRequestObjectResult>(result);
     }
+
     [Fact]
     public async Task UpdatePersonaAsync_WithDiferentIds_ExpectBadRequest()
     {
@@ -102,10 +112,11 @@ public class PeliculaControllerTests
 
         var controller = new PersonaController(repositoyStub.Object);
 
-        var result = await controller.Put(2, personaMock);
+        var result = await controller.Put(diferentId, personaMock);
 
         Assert.IsType<BadRequestObjectResult>(result);
     }
+
     [Fact]
     public async Task UpdatePersonaAsync_WithSameIds_ExpectNoContent()
     {
@@ -114,10 +125,11 @@ public class PeliculaControllerTests
 
         var controller = new PersonaController(repositoyStub.Object);
 
-        var result = await controller.Put(1, personaMock);
+        var result = await controller.Put(personaMock.Id, personaMock);
 
         Assert.IsType<NoContentResult>(result);
     }
+
     [Fact]
     public async Task DeletePersonaAsync_WithUnExistId_ExpectBadRequest()
     {
@@ -126,31 +138,33 @@ public class PeliculaControllerTests
 
         var controller = new PersonaController(repositoyStub.Object);
 
-        var result = await controller.Delete(2);
+        var result = await controller.Delete(unExistId);
 
         Assert.IsType<BadRequestObjectResult>(result);
     }
+
     [Fact]
-    public async Task DeletePersonaAsync_WithExistId_ExpectBadRequest()
+    public async Task DeletePersonaAsync_WithExistId_ExpectNoContent()
     {
         var repositoyStub = new Mock<IPersonaRepository>();
-        repositoyStub.Setup(repo => repo.DeletePersonaAsync(1)).ReturnsAsync(1);
+        repositoyStub.Setup(repo => repo.DeletePersonaAsync(personaMock.Id)).ReturnsAsync(1);
 
         var controller = new PersonaController(repositoyStub.Object);
 
-        var result = await controller.Delete(1);
+        var result = await controller.Delete(personaMock.Id);
 
         Assert.IsType<NoContentResult>(result);
     }
+
     [Fact]
     public async Task DeletePersonaAsync_WithInvalidId_ExpectBadRequest()
     {
         var repositoyStub = new Mock<IPersonaRepository>();
-        repositoyStub.Setup(repo => repo.DeletePersonaAsync(1)).ReturnsAsync(1);
+        repositoyStub.Setup(repo => repo.DeletePersonaAsync(personaMock.Id)).ReturnsAsync(1);
 
         var controller = new PersonaController(repositoyStub.Object);
 
-        var result = await controller.Delete(-1);
+        var result = await controller.Delete(invalidId);
 
         Assert.IsType<BadRequestObjectResult>(result);
     }
